@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Materie Scolastiche</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1f6fb2">
+
+
+  <!-- COLLEGAMENTO CORRETTO AL CSS -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <header>
+    <h1 id="app-title">Materie Scolastiche</h1>
+  </header>
+
+  <main>
+    <!-- LISTA MATERIE -->
+    <section id="subjects-list">
+      <h2>Materie</h2>
+      <ul id="subjects"></ul>
+    </section>
+
+    <!-- PAGINA DI UNA MATERIA -->
+    <section id="subject-view">
+      <button id="back-btn" class="btn-back">◀ Torna alle materie</button>
+
+      <h2 id="subject-name"></h2>
+
+      <div id="average-block" class="average-box">
+        <span class="label">Media:</span>
+        <span id="average-value" class="average-value">0.000</span>
+      </div>
+
+      <!-- FORM INSERIMENTO VOTO -->
+      <form id="add-grade-form" class="grade-form">
+        <label>
+          Nota: 
+          <input type="number" step="0.01" id="grade-input" required min="0" max="10" />
+        </label>
+
+        <label>
+          Commento (opzionale):
+          <textarea id="comment-input" rows="2" placeholder="Inserisci un commento..."></textarea>
+        </label>
+
+        <button type="submit" class="btn-submit">Invia</button>
+      </form>
+
+      <!-- LISTA VOTI -->
+      <section class="grades-section">
+        <h3>Elenco voti</h3>
+        <ul id="grades-list"></ul>
+      </section>
+    </section>
+  </main>
+
+
+<script>
+const SUBJECTS = [
+  'Matematica', 'Italiano', 'Comunicazione', 'Inglese', 'Tedesco',
+  'Francese', 'Storia', 'Scienze', 'Diritto', 'ASPE', 'Educazione fisica'
+];
+
+const subjectsUl = document.getElementById('subjects');
+const subjectView = document.getElementById('subject-view');
+const subjectNameEl = document.getElementById('subject-name');
+const backBtn = document.getElementById('back-btn');
+const averageValueEl = document.getElementById('average-value');
+const gradesList = document.getElementById('grades-list');
+const addGradeForm = document.getElementById('add-grade-form');
+const gradeInput = document.getElementById('grade-input');
+const commentInput = document.getElementById('comment-input');
+
+let currentSubject = null;
+
+// --- Storage
+function storageKey(s){ return "materie_" + s; }
+function loadGrades(s){
+  const raw = localStorage.getItem(storageKey(s));
+  if(!raw) return [];
+  try{ return JSON.parse(raw); } catch { return []; }
+}
+function saveGrades(s, arr){
+  localStorage.setItem(storageKey(s), JSON.stringify(arr));
+}
+
+// --- Calcola media
+function calcAverage(arr){
+  if(arr.length === 0) return 0;
+  const sum = arr.reduce((t,i)=>t+Number(i.value),0);
+  return Number((sum/arr.length).toFixed(3));
+}
+
+// --- Render materie
+function renderSubjects(){
+  subjectsUl.innerHTML = "";
+  SUBJECTS.forEach(s=>{
+    const li=document.createElement('li');
+    const btn=document.createElement('button');
+    btn.className="subject-btn";
+    btn.textContent=s;
+    btn.addEventListener("click",()=>openSubject(s));
+    li.appendChild(btn);
+    subjectsUl.appendChild(li);
+  });
+}
+
+function openSubject(s){
+  currentSubject = s;
+  document.getElementById("subjects-list").style.display="none";
+  subjectView.style.display="block";
+  subjectNameEl.textContent = s;
+  renderSubjectData();
+}
+
+function closeSubject(){
+  subjectView.style.display="none";
+  document.getElementById("subjects-list").style.display="block";
+  currentSubject = null;
+}
+
+backBtn.onclick = () => closeSubject();
+
+// --- Render voti
+function renderSubjectData(){
+  let data = loadGrades(currentSubject);
+
+  // Ordina dalla più recente in alto
+  data = data.slice().reverse();
+
+  const avg = calcAverage(data);
+  averageValueEl.textContent = avg.toFixed(3);
+
+  gradesList.innerHTML = "";
+  if(data.length===0){
+    gradesList.innerHTML="<li>Nessun voto ancora.</li>";
+    return;
+  }
+
+  data.forEach((item,index)=>{
+    const li=document.createElement('li');
+    li.className="grade-item";
+
+    // Colore del cerchio
+    if(item.value>=5) li.classList.add("grade--high");
+    else if(item.value>=4) li.classList.add("grade--mid");
+    else li.classList.add("grade--low");
+
+    // Contenuto con icona cestino
+    li.innerHTML = `
+      <span class="grade-number">${item.value}</span>
+      ${item.comment ? `<span class="grade-comment">→ "${item.comment}"</span>` : ""}
+      <span class="delete-btn" style="margin-left:auto;cursor:pointer;color:#b5282f;font-weight:bold;">🗑️</span>
+    `;
+
+    // Gestione click sul cestino
+    li.querySelector(".delete-btn").addEventListener("click",()=>{
+      // Rimuove l'elemento corretto dall'array originale
+      const originalData = loadGrades(currentSubject);
+      // Ricorda: invertito per la visualizzazione
+      const idxToRemove = originalData.length - 1 - index;
+      originalData.splice(idxToRemove,1);
+      saveGrades(currentSubject, originalData);
+      renderSubjectData();
+    });
+
+    gradesList.appendChild(li);
+  });
+}
+
+// --- Aggiungi voto
+addGradeForm.addEventListener("submit", e=>{
+  e.preventDefault();
+  const val = Number(gradeInput.value);
+  if(isNaN(val)) return;
+  const comment = commentInput.value.trim() || null;
+
+  const arr = loadGrades(currentSubject);
+  arr.push({value: val, comment});
+  saveGrades(currentSubject, arr);
+
+  gradeInput.value="";
+  commentInput.value="";
+
+  renderSubjectData();
+});
+
+renderSubjects();
+</script>
+
+
+
+</body>
+</html>
