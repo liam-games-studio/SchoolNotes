@@ -1,0 +1,119 @@
+:root{
+  --bg: #f5f7fb;
+  --card: #ffffff;
+  --text: #102a43;
+  --muted: #586775;
+  --accent: #1f6fb2;
+  --success: #138f5a;
+  --warning: #c07b1a;
+  --danger: #b5282f;
+  --radius: 10px;
+  --gap: 12px;
+}
+
+/* Reset/base */
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  background: var(--bg);
+  color: var(--text);
+  padding:20px;
+}
+
+/* Title */
+header{display:flex;justify-content:center;margin-bottom:18px}
+#app-title{
+  font-size:1.4rem;
+  font-weight:700;
+  margin:0;
+  color:var(--accent);
+}
+
+/* Main layout */
+main{max-width:900px;margin:0 auto}
+
+/* Subjects list - simple grid */
+#subjects{list-style:none;padding:0;margin:10px 0;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:var(--gap)}
+#subjects li{margin:0}
+.subject-btn{
+  width:100%;
+  display:block;
+  text-align:left;
+  padding:12px;
+  background:var(--card);
+  border-radius:var(--radius);
+  border:1px solid rgba(0,0,0,0.05);
+  cursor:pointer;
+  font-weight:600;
+}
+
+/* Subject view */
+#subject-view{display:none;margin-top:18px;background:var(--card);padding:14px;border-radius:12px;border:1px solid rgba(0,0,0,0.04)}
+#back-btn{background:transparent;border:0;color:var(--accent);cursor:pointer;padding:6px 8px;margin-bottom:6px}
+
+/* Average block */
+#average-block{display:flex;align-items:center;gap:10px;margin:8px 0}
+#average-block .label{font-weight:600;color:var(--muted)}
+#average-value{
+  display:inline-block;
+  min-width:72px;
+  text-align:center;
+  font-weight:800;
+  padding:8px 10px;
+  border-radius:8px;
+  background:rgba(0,0,0,0.03);
+}
+
+/* Simple color states for average (add these classes via JS) */
+.average--high #average-value{ color:var(--success); border:1px solid rgba(19,143,90,0.15)}
+.average--mid  #average-value{ color:var(--warning); border:1px solid rgba(192,123,26,0.15)}
+.average--low  #average-value{ color:var(--danger);  border:1px solid rgba(181,40,47,0.15)}
+
+/* Form */
+.grade-form{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end}
+.grade-form label{font-size:0.9rem;color:var(--muted)}
+#grade-input{padding:8px;border-radius:8px;border:1px solid rgba(0,0,0,0.08);width:120px}
+#comment-input{padding:8px;border-radius:8px;border:1px solid rgba(0,0,0,0.08);min-width:220px;max-width:100%}
+.btn-submit{padding:8px 12px;border-radius:8px;border:0;background:var(--accent);color:#fff;cursor:pointer;font-weight:700}
+
+/* Grades list - each item simple, grade value in a circle */
+#grades-list{list-style:none;padding:0;margin-top:12px;display:flex;flex-direction:column;gap:8px}
+.grade-item{
+  display:flex;
+  align-items:center;
+  justify-content:flex-start;
+  gap:12px;
+  padding:8px 10px;
+  background:rgba(255,255,255,0.95);
+  border-radius:8px;
+  border:1px solid rgba(0,0,0,0.04);
+}
+
+/* CIRCLE for the grade value */
+.grade-number{
+  width:44px;
+  height:44px;
+  min-width:44px;
+  border-radius:50%;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:800;
+  background:rgba(0,0,0,0.03);
+  color:var(--text);
+  border:1px solid rgba(0,0,0,0.06);
+}
+
+/* Color states for individual grade circles (JS: add .grade--high/.grade--mid/.grade--low on .grade-item) */
+.grade--high .grade-number{ color:var(--success); border-color: rgba(19,143,90,0.15); background: rgba(19,143,90,0.06) }
+.grade--mid  .grade-number{ color:var(--warning); border-color: rgba(192,123,26,0.15); background: rgba(192,123,26,0.06) }
+.grade--low  .grade-number{ color:var(--danger);  border-color: rgba(181,40,47,0.15); background: rgba(181,40,47,0.06) }
+
+.grade-comment{color:var(--muted);font-size:0.95rem}
+
+/* Small responsive tweak */
+@media (max-width:640px){
+  #grade-input{width:100%}
+  .grade-form{flex-direction:column;align-items:stretch}
+}
